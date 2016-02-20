@@ -87,8 +87,9 @@ BEAM_DATA_FREQ = [699.9, 900.1]
 
 # These are the fit parameters that come out of fit_basic(), which agree with
 # Jonathan Sievers' MCMC fits to the expected level (1 sigma).
-FIT_PARS = [26881.81213399937, 145.2163514832117, 0.00082513254798026068, 
-           -2.0071160312987062, 0.0042048710612025281, -0.00050943984565836905] 
+FIT_PARS = [26882.02079600043, 146.88141572126065, 0.00041035919972501496,
+            9.1445963864239523, 0.00018791112781123314, 0.00049437288206661937]
+ 
 
 B2319_PARS = [52187.604450591927, 94.783490187710271, 0.17607219167484128,
         2.0978781725590876, 0.010991132078497551, -0.0010897690798342145]
@@ -103,7 +104,7 @@ ALPHA_POL = 6.64
 
 if BURST:
     # Shift some parameters for well behaved fitting.
-    T_OFF = 26881.8
+    T_OFF = 26881.90
     DM_OFF = 146
 else:
     # Pulsar dependant:
@@ -541,7 +542,7 @@ def fit_basic():
     # Real scan angle.  Constant elevation scan.
     scan_loc = (az - az[0]) * np.cos(el[0] * np.pi / 180)
 
-    pars0 = [0.011, 0.9, 0.001, 2., 0.001, 0.001]
+    pars0 = [0.120, 0.9, 0.001, 2., 0.001, 0.001]
 
     std_I = np.sqrt(var[:,0])
     weights = np.empty_like(std_I)
@@ -597,7 +598,7 @@ def fit_basic():
 
 
 
-def plot_pulse(data_I, freq, time, t0, dm, time_range=0.4):
+def plot_pulse(data_I, freq, time, t0, dm, time_range=0.6):
 
     time_selector = RangeSelector(time)
     delay = delay_from_dm(freq, dm, t0)
