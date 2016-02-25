@@ -45,7 +45,7 @@ if BURST:
     SRC_CAL_PHASES = [11, 45, 14, 0]
 
     # The small time slice of data containing the burst.
-    TSL = np.s_[22500:39500]
+    TSL = np.s_[27500:34500]
 
 else:
     # For analysis of pulsar single pulses.
@@ -533,8 +533,8 @@ def fit_basic():
         var[ii] = np.var(data[ii,:,5000:-5000], -1)
 
     data_I = data[:,0,TSL]
-    print np.mean(data_I)
-    print np.std(data_I)
+    print "mean od data_I:\n", np.mean(data_I)
+    print "std of data_I:\n", np.std(data_I)
     time = time[TSL]
 
     ntime = len(time)
