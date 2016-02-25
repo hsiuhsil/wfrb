@@ -45,7 +45,7 @@ if BURST:
     SRC_CAL_PHASES = [11, 45, 14, 0]
 
     # The small time slice of data containing the burst.
-    TSL = np.s_[27500:34500]
+    TSL = np.s_[24500:37500]
 
 else:
     # For analysis of pulsar single pulses.
@@ -129,7 +129,7 @@ def main():
 #    reformat_raw_data()
 #    calibrator_spectra()
 #    calibrate()
-#    filter()
+    filter()
 
     #plot()
 
