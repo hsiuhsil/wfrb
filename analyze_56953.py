@@ -27,25 +27,25 @@ BURST = True
 
 if BURST:
     # For analysis of FRB110523
-    DATAROOT = "/scratch2/p/pen/hsiuhsil/burst_candidates/FRB110523/raw_data/"
-    OUT_ROOT = '/scratch2/p/pen/hsiuhsil/burst_candidates/FRB110523'
-    FILENAME = "guppi_55704_wigglez22hrst_0258_0001.fits"
+    DATAROOT = "/scratch2/p/pen/hsiuhsil/burst_candidates/56953_1hr_0013/raw_data/"
+    OUT_ROOT = '/scratch2/p/pen/hsiuhsil/burst_candidates/56953_1hr_0013'
+    FILENAME = "guppi_56953_wigglez1hr_centre_0013_0002.fits"
 
     # Calibration source scans.
     SRCFILES = [
-        "guppi_55704_3C48_0006_0001.fits",
-        "guppi_55704_3C48_0007_0001.fits",
-        "guppi_55704_3C48_0008_0001.fits",
-        "guppi_55704_3C48_0009_0001.fits",
+        "guppi_56953_3C48_0006_0001.fits",
+        "guppi_56953_3C48_0007_0001.fits",
+        "guppi_56953_3C48_0008_0001.fits",
+        "guppi_56953_3C48_0009_0001.fits",
         ]
 
     # Hard code the phase of the noise cal, since I'm too lazy to write an algorithm
     # to find it.
-    DATA_CAL_PHASE = 1
-    SRC_CAL_PHASES = [40, 42, 28, 47]
+    DATA_CAL_PHASE = 5
+    SRC_CAL_PHASES = [11, 45, 14, 0]
 
     # The small time slice of data containing the burst.
-    TSL = np.s_[23000:26500]
+    TSL = np.s_[22500:39500]
 
 else:
     # For analysis of pulsar single pulses.
@@ -87,8 +87,7 @@ BEAM_DATA_FREQ = [699.9, 900.1]
 
 # These are the fit parameters that come out of fit_basic(), which agree with
 # Jonathan Sievers' MCMC fits to the expected level (1 sigma).
-FIT_PARS = [54290.138578290294, 623.35540269174237, 0.0039736854175394781, 
-            7.8287795616885543, 0.00071318994294502418, 0.00160942937546788]
+FIT_PARS = [12352.187, 1612.9, 0.001, 2.0, 0.001, 0.001] 
 
 B2319_PARS = [52187.604450591927, 94.783490187710271, 0.17607219167484128,
         2.0978781725590876, 0.010991132078497551, -0.0010897690798342145]
@@ -103,8 +102,8 @@ ALPHA_POL = 6.64
 
 if BURST:
     # Shift some parameters for well behaved fitting.
-    T_OFF = 54290.1
-    DM_OFF = 620
+    T_OFF = 12352.1
+    DM_OFF = 1612
 else:
     # Pulsar dependant:
     # B2319
@@ -161,7 +160,7 @@ def main():
 def reformat_raw_data():
     hdulist = pyfits.open(path.join(DATAROOT, FILENAME), 'readonly')
     if BURST:
-        data, time, freq, ra, dec, az, el = read_fits_data(hdulist)
+        data, time, freq, ra, dec, az, el = read_fits_data(hdulist, 20, 50)
     else:
         # These pulsar files are too long to read all of them.
         data, time, freq, ra, dec, az, el = read_fits_data(hdulist, 0, 25)
@@ -404,7 +403,7 @@ def filter():
 
     mean = np.mean(data, axis=-1)
     delta_t = abs(np.mean(np.diff(time)))
-    high_pass(data, 0.2 / delta_t)    # 200 ms HPF.
+    high_pass(data, 0.05 / delta_t)    # 200 ms HPF.
 
     std = np.empty(data.shape[:-1], dtype=float)
     skew = np.empty(data.shape[:-1], dtype=float)
@@ -534,12 +533,15 @@ def fit_basic():
         var[ii] = np.var(data[ii,:,5000:-5000], -1)
 
     data_I = data[:,0,TSL]
+    print np.mean(data_I)
+    print np.std(data_I)
     time = time[TSL]
+
     ntime = len(time)
     # Real scan angle.  Constant elevation scan.
     scan_loc = (az - az[0]) * np.cos(el[0] * np.pi / 180)
 
-    pars0 = [0.038, 3., 0.004, 7., 0.001, 0.001]
+    pars0 = [0.087, 0.9, 0.001, 2., 0.001, 0.001]
 
     std_I = np.sqrt(var[:,0])
     weights = np.empty_like(std_I)
@@ -557,7 +559,7 @@ def fit_basic():
                 time,
                 pars0_real,
                 )
-    plot_pulse(initial_model, freq, time, pars0_real[0], pars0_real[1])
+#    plot_pulse(initial_model, freq, time, pars0_real[0], pars0_real[1])
     plt.show()
 
     residuals = lambda p: (
@@ -595,7 +597,7 @@ def fit_basic():
 
 
 
-def plot_pulse(data_I, freq, time, t0, dm, time_range=0.4):
+def plot_pulse(data_I, freq, time, t0, dm, time_range=4):
 
     time_selector = RangeSelector(time)
     delay = delay_from_dm(freq, dm, t0)
@@ -1458,8 +1460,7 @@ def rm_measure():
 
     plt.figure()
     plt.plot(rm_syn_range, rm_syn_array)
-    plt.show()    
-            
+    plt.show()   
 
 # Polarized pulse profile plot
 # ============================
@@ -1906,5 +1907,3 @@ def downsample(data, factor):
 
 if __name__ == "__main__":
     main()
-
-
