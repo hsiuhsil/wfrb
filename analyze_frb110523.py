@@ -1431,31 +1431,30 @@ def rm_measure():
     print "Correlations:\n", corr
 
 
-    plt.figure()
+#    plt.figure()
 #    plt.plot(freq_rebin, spec_rebin[:,1], '.')
 #    plt.plot(freq, rm_model(real_pars)[:nfreq])
 
 #    plt.plot(freq_rebin, spec_rebin[:,2], '.')
 #    plt.plot(freq, rm_model(real_pars)[nfreq:])
 
+#    plt.show()
 
-    plt.show()
-
-    def rm_synthesis(rm):
+    def rm_synthesis(rm, alpha):
+        freq0 = 800e6
         wavelength = 3e8 / (freq * 1e6)
-        wavelength0 = 3e8 / 800e6
-        p = []
-        for ii in range(len(spec_rebin[:,1])):
-            p.append(spec_rebin[ii,1] + 1j*spec_rebin[ii,2])
-            p[ii] *= np.exp(-2j * rm * (wavelength**2 - wavelength0**2))
+        wavelength0 = 3e8 / freq0
+        p = spectrum[:,1] + 1j*spectrum[:,2]
+        p *= np.exp(-2j * rm * (wavelength**2 - wavelength0**2))
+        p *= (freq/freq0)**(-alpha)
         rm_syn = np.abs(np.mean(p))
         return rm_syn
 
-    delta_rm = 50
-    rm_syn_range = np.arange(rmpars[2] - delta_rm, rmpars[2] + delta_rm, 0.5)
+    delta_rm = 100
+    rm_syn_range = np.arange(0, rmpars[2] + delta_rm, 0.5)
     rm_syn_array = []
     for ii in rm_syn_range:
-        rm_syn_array.append(rm_synthesis(ii))
+        rm_syn_array.append(rm_synthesis(ii, rmpars[1]))
 
     plt.figure()
     plt.plot(rm_syn_range, rm_syn_array)
