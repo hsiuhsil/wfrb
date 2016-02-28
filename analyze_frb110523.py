@@ -45,7 +45,7 @@ if BURST:
     SRC_CAL_PHASES = [40, 42, 28, 47]
 
     # The small time slice of data containing the burst.
-    TSL = np.s_[23000:26500]
+    TSL = np.s_[3000:20000]
 
 else:
     # For analysis of pulsar single pulses.
@@ -161,7 +161,7 @@ def main():
 def reformat_raw_data():
     hdulist = pyfits.open(path.join(DATAROOT, FILENAME), 'readonly')
     if BURST:
-        data, time, freq, ra, dec, az, el = read_fits_data(hdulist)
+        data, time, freq, ra, dec, az, el = read_fits_data(hdulist, 6, 16)
     else:
         # These pulsar files are too long to read all of them.
         data, time, freq, ra, dec, az, el = read_fits_data(hdulist, 0, 25)
@@ -534,6 +534,8 @@ def fit_basic():
         var[ii] = np.var(data[ii,:,5000:-5000], -1)
 
     data_I = data[:,0,TSL]
+    print np.mean(data_I)
+    print np.std(data_I)
     time = time[TSL]
     ntime = len(time)
     # Real scan angle.  Constant elevation scan.
@@ -595,7 +597,7 @@ def fit_basic():
 
 
 
-def plot_pulse(data_I, freq, time, t0, dm, time_range=0.4):
+def plot_pulse(data_I, freq, time, t0, dm, time_range= 0.8):
 
     time_selector = RangeSelector(time)
     delay = delay_from_dm(freq, dm, t0)
